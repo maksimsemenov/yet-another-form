@@ -1,0 +1,14 @@
+
+test/
+coverage/
+perf/
+tsconfig.json
+**/*.test.ts
+**/*.test.js
+**/types.ts
+**/errors.ts
+stryker.conf.json
+.editorconfig
+.eslintrc.json
+.prettierrc
+.babelrc.json

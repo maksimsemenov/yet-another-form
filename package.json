@@ -1,0 +1,92 @@
+{
+  "name": "yet-another-form",
+  "version": "0.1.0",
+  "description": "Form state management library",
+  "keywords": [
+    "state",
+    "form",
+    "react",
+    "hook"
+  ],
+  "scripts": {
+    "size": "size-limit",
+    "spell": "yaspeller *.md yaspeller-ci *.md",
+    "clean": "rimraf coverage/",
+    "test:watch": "npx jest --watch --env=jsdom",
+    "test:watch-c": "npx jest --watch --coverage --env=jsdom",
+    "test": "npx jest --coverage --env=jsdom"
+  },
+  "author": "Maksim Semenov <hi@maxsemenov.com",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "types": "./index.d.ts",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "statements": 95
+      }
+    },
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "testMatch": [
+      "**/?(*.)(spec|test).js"
+    ],
+    "transform": {
+      "\\.jsx?$": "babel-jest"
+    }
+  },
+  "size-limit": [
+    {
+      "path": "src/react/index.js"
+    },
+    {
+      "path": "src/core/index.js",
+      "import": "{ createFormStore }"
+    }
+  ],
+  "peerDependencies": {
+    "preact": ">=10.0.0",
+    "react": ">=16.8.0"
+  },
+  "peerDependenciesMeta": {
+    "preact": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "7.16.8",
+    "@babel/preset-env": "7.16.7",
+    "@babel/preset-react": "7.16.7",
+    "@size-limit/preset-small-lib": "7.0.3",
+    "@stryker-mutator/core": "5.6.0",
+    "@stryker-mutator/jest-runner": "5.6.0",
+    "@testing-library/react-hooks": "7.0.1",
+    "babel-jest": "27.4.6",
+    "eslint": "7.32.0",
+    "eslint-config-standard": "16.0.3",
+    "eslint-plugin-import": "2.25.3",
+    "eslint-plugin-jest": "25.3.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "5.2.0",
+    "eslint-plugin-react": "7.27.1",
+    "faker": "5.5.3",
+    "jest": "27.4.7",
+    "lodash": "4.17.21",
+    "prettier": "2.5.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-test-renderer": "17.0.2",
+    "size-limit": "7.0.3",
+    "stryker-api": "0.24.1",
+    "stryker-javascript-mutator": "0.14.1",
+    "stryker-jest-runner": "1.4.1"
+  }
+}
