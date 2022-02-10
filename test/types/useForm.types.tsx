@@ -19,7 +19,7 @@ interface FormValues {
 const initialValues = { name: '', address: { state: 'NJ', city: '' } }
 
 export const App = () => {
-  const { Form, values, setValue, setTouched, formContext } = useForm({
+  const { Form, values, setValue, setTouched } = useForm({
     initialValues,
   })
 

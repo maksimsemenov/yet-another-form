@@ -5,7 +5,6 @@ declare module 'yet-another-form/react' {
     DeepMap,
     DeepPartial,
     DeepPathMap,
-    ForwardRefRenderFunction,
     Values,
     DeepValueByPath,
   } from 'yet-another-form/types'
