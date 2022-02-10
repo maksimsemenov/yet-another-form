@@ -1,7 +1,7 @@
 import React = require('react')
-import { FormConfig, FormContext, FormStatus } from '../core'
+import { FormConfig, FormContext, FormStatus } from 'yet-another-form/core'
 
-interface UseForm<T extends Record<string, unknown>> extends FormStatus {
+interface UseForm<T extends object = {}> extends FormStatus {
   /**
    * Thin wrapper around HTML `<form>` element. It wraps `<form>` into form context provider,
    * and "binds" its `onSubmit` handler with the form store
@@ -44,7 +44,7 @@ interface UseForm<T extends Record<string, unknown>> extends FormStatus {
    */
   setError:
     | ((error: string | undefined | unknown, fieldPath: string) => void)
-    | ((errors: Record<string, unknown | string | undefined>) => void)
+    | ((errors: object) => void)
     | ((fieldPath: string) => (error: string | undefined | unknown) => void)
 
   /**
@@ -52,7 +52,7 @@ interface UseForm<T extends Record<string, unknown>> extends FormStatus {
    */
   setTouched:
     | ((touched: string | undefined | unknown, fieldPath: string) => void)
-    | ((touched: Record<string, unknown | string | undefined>) => void)
+    | ((touched: object) => void)
     | ((fieldPath: string) => (touched: string | undefined | unknown) => void)
 
   /**
@@ -66,8 +66,8 @@ interface UseForm<T extends Record<string, unknown>> extends FormStatus {
   formContext: FormContext<T>
 }
 
-export function useForm<T extends Record<string, unknown> = {}>(
-  config: FormConfig<T>
+export function useForm<T extends object = {}>(
+  config?: FormConfig<T>
 ): UseForm<T>
 
 interface UseFormField<T = unknown> {
@@ -114,18 +114,15 @@ interface UseFormField<T = unknown> {
   setValue: (value: T | React.ChangeEvent<HTMLInputElement>) => void
 }
 
-export function useFormField<
-  T = unknown,
-  V extends Record<string, unknown> = {}
->(
+export function useFormField<V = unknown, T extends object = {}>(
   fieldPath: string,
   options: {
-    formContext: FormContext<V>
+    formContext: FormContext<T>
     validate: (
-      value: T | unknown,
+      value: V | unknown,
       values: Partial<V>
     ) => string | undefined | unknown | Promise<string | undefined | unknown>
   }
-): UseFormField<T>
+): UseFormField<V>
 
 export function useFormStatus(formContext: FormContext): FormStatus

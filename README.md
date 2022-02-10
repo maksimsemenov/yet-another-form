@@ -26,7 +26,7 @@ Yet another form-state management library. There are a bunch of them. This one i
 2. Import `useForm` hook into yor component
 
    ```jsx
-   import { useForm } from 'yet-another-form'
+   import { useForm } from 'yet-another-form/react'
 
    const AddUser = ({ onAddUser }) => {
      const { Form, setValue, values } = useForm({ onSubmit: onAddUser })
@@ -248,3 +248,11 @@ const formState = useFormState(formContext)
   - auto-subscribable, which means that if it was not read from the `useForm` hook, the react component will not be updated, if it changes
 - `validatingFields: string[]` — list of fields that are validating (in case of async validation)
   - auto-subscribable, which means that if it was not read from the `useForm` hook, the react component will not be updated, if it changes
+
+## Credits
+
+Part of the code, typings and API design was inspired by other form state management libraries:
+
+- [react-form](https://github.com/tannerlinsley/react-form)
+- [reakit](https://github.com/reakit/reakit)
+- [react-final-form](https://github.com/final-form/react-final-form)

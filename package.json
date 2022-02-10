@@ -10,20 +10,22 @@
   ],
   "scripts": {
     "size": "size-limit",
-    "spell": "yaspeller *.md yaspeller-ci *.md",
-    "clean": "rimraf coverage/",
     "test:watch": "npx jest --watch --env=jsdom",
     "test:watch-c": "npx jest --watch --coverage --env=jsdom",
-    "test": "npx jest --coverage --env=jsdom"
+    "test": "npx jest --coverage --env=jsdom && check-dts"
   },
   "author": "Maksim Semenov <hi@maxsemenov.com",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maksimsemenov/yet-another-form.git"
+  },
   "sideEffects": false,
   "type": "module",
-  "types": "./index.d.ts",
   "engines": {
     "node": ">=10.0.0"
   },
+  "types": "index.d.ts",
   "jest": {
     "coverageThreshold": {
       "global": {
@@ -66,10 +68,12 @@
     "@babel/preset-env": "7.16.7",
     "@babel/preset-react": "7.16.7",
     "@size-limit/preset-small-lib": "7.0.3",
-    "@stryker-mutator/core": "5.6.0",
+    "@stryker-mutator/core": "^5.6.1",
     "@stryker-mutator/jest-runner": "5.6.0",
     "@testing-library/react-hooks": "7.0.1",
+    "@types/react": "17.0.39",
     "babel-jest": "27.4.6",
+    "check-dts": "0.6.6",
     "eslint": "7.32.0",
     "eslint-config-standard": "16.0.3",
     "eslint-plugin-import": "2.25.3",
