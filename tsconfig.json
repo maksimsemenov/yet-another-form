@@ -7,5 +7,5 @@
     "noEmit": true,
     "jsx": "react"
   },
-  "exclude": ["**/errors.ts"]
+  "exclude": ["**/errors.ts", "**/errors.tsx"]
 }

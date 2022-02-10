@@ -37,7 +37,7 @@ const setterFactory =
     }
   }
 
-const useForm = (config = {}) => {
+export const useForm = (config = {}) => {
   let storeRef = useRef(),
     prevConfigRef = useRef(config),
     settersRef = useRef()
@@ -119,7 +119,7 @@ const checkStore = (store) => {
   }
 }
 
-const useFormField = (path, fieldConfig) => {
+export const useFormField = (path, fieldConfig) => {
   let store = useContext(FormContext) || fieldConfig?.formContext
   checkStore(store)
 
@@ -170,11 +170,9 @@ const useFormStatusFields = (target, formContext) => {
   )
 }
 
-const useFormStatus = (formContext) => {
+export const useFormStatus = (formContext) => {
   let store = useContext(FormContext) || formContext
   checkStore(store)
 
   return useFormStatusFields({}, store)
 }
-
-module.exports = { useFormStatus, useFormField, useForm }
