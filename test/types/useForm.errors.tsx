@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useForm, useFormField } from 'yet-another-form/react'
+import { useForm } from '../../react'
 
 interface FormValues {
   name: string
