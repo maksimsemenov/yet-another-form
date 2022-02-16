@@ -1,6 +1,6 @@
 {
   "name": "yet-another-form",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Form state management library",
   "keywords": [
     "state",
@@ -19,6 +19,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/maksimsemenov/yet-another-form.git"
+  },
+  "exports": {
+    "./react": "./src/react/index.js"
   },
   "sideEffects": false,
   "type": "module",
