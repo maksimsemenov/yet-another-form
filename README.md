@@ -4,7 +4,7 @@ Yet another form-state management library. There are a bunch of them. This one i
 
 ## Motivation
 
-- Size. The gil was to create the smallest form management library. We use [`size-limit`](https://github.com/ai/size-limit) to check the size of the library after each commit.
+- Size. The goal was to create the smallest form management library. We use [`size-limit`](https://github.com/ai/size-limit) to check the size of the library after each commit.
 
 ---
 
