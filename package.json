@@ -21,6 +21,7 @@
     "url": "https://github.com/maksimsemenov/yet-another-form.git"
   },
   "exports": {
+    "./core": "./core/index.js",
     "./react": "./react/index.js"
   },
   "sideEffects": false,
@@ -47,10 +48,10 @@
   },
   "size-limit": [
     {
-      "path": "src/react/index.js"
+      "path": "react/index.js"
     },
     {
-      "path": "src/core/index.js",
+      "path": "core/index.js",
       "import": "{ createFormStore }"
     }
   ],
@@ -70,7 +71,8 @@
     "@babel/plugin-transform-modules-commonjs": "7.16.8",
     "@babel/preset-env": "7.16.7",
     "@babel/preset-react": "7.16.7",
-    "@size-limit/preset-small-lib": "7.0.3",
+    "@size-limit/esbuild": "11.2.0",
+    "@size-limit/file": "11.2.0",
     "@stryker-mutator/core": "^5.6.1",
     "@stryker-mutator/jest-runner": "5.6.0",
     "@testing-library/react-hooks": "7.0.1",
@@ -91,7 +93,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-test-renderer": "17.0.2",
-    "size-limit": "7.0.3",
+    "size-limit": "^11.2.0",
     "stryker-api": "0.24.1",
     "stryker-javascript-mutator": "0.14.1",
     "stryker-jest-runner": "1.4.1"
