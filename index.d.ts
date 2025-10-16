@@ -152,7 +152,7 @@ declare module 'yet-another-form/types' {
         ? Array<VariableDeepMap<U, V>> | V
         : object extends U
         ? Array<VariableDeepMap<U, V>> | V
-        : Array<V>
+        : Array<V> | V
       : T[K] extends object
       ? VariableDeepMap<T[K], V> | V
       : object extends T[K]

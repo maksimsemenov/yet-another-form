@@ -151,7 +151,7 @@ export type VariableDeepMap<T, V> = {
       ? Array<VariableDeepMap<U, V>> | V
       : object extends U
       ? Array<VariableDeepMap<U, V>> | V
-      : Array<V>
+      : Array<V> | V
     : T[K] extends object
     ? VariableDeepMap<T[K], V> | V
     : object extends T[K]
@@ -178,7 +178,7 @@ export type DeepPathMap<T> = T extends object
   ? {
       [P in keyof T]: P extends string
         ? T[P] extends Array<infer U>
-          ? `${P}.${number}` | `${P}.${number}.${Values<DeepPathMap<U>>}`
+          ? P | `${P}.${number}` | `${P}.${number}.${Values<DeepPathMap<U>>}`
           : T[P] extends object
           ? P | `${P}.${Values<DeepPathMap<T[P]>>}`
           : P
