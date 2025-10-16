@@ -146,16 +146,15 @@ const formContext = useForm(config)
 - `formContext: FormContext` — a form store, in case you need to pass it to other hooks manually
 - `setError: function` — sets error for the form or a particular field
   - support several signatures:
-    - `(error: string | undefined, fieldPath: string) => void`
-    - `(error: Promise<string | undefined>, fieldPath: string) => void`
+    - `(fieldPath: string, error: string | undefined) => void`
+    - `(fieldPath: string, error: Promise<string | undefined>) => void`
     - `(fieldPath: string) => (error: string | undefined) => void`
     - `(fieldPath: string) => (error: Promise<string | undefined>) => void`
   - it keeps the reference between rerenders, so it is safe to pass it to `useEffect` or `useCallback`
 - `setTouched: function` — sets whether particular field or fields were touched or not
   - support several signatures:
     - `(event: BlurEvent) => void`
-    - `(event: BlurEvent, fieldPath: string) => void`
-    - `(touched: boolean, fieldPath: string) => void`
+    - `(fieldPath: string, touched: boolean) => void`
     - `(fieldPath: string) => (touched: boolean) => void`
     - `(fieldPath: string) => (event: BlurEvent) => void`
   - can be passed to `onBlur` handler. In this case, will set the touched value to true when input loses focus
@@ -163,8 +162,8 @@ const formContext = useForm(config)
 - `setValue: function` — sets value for the form or a particular field
   - support several signatures:
     - `(event: ChangeEvent) => void`
-    - `(event: ChangeEvent, fieldPath: string) => void`
-    - `(value: any, fieldPath: string) => void`
+    - `(event: ChangeEvent) => void`
+    - `(fieldPath: string, value: any) => void`
     - `(fieldPath: string) => (event: ChangeEvent) => void`
     - `(fieldPath: string) => (value: any) => void`
   - can be passed to `onChange` handler. In this case, it will try to read the field path from the input name

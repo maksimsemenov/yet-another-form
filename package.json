@@ -1,6 +1,6 @@
 {
   "name": "yet-another-form",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Form state management library",
   "keywords": [
     "state",
@@ -29,7 +29,11 @@
   "engines": {
     "node": ">=10.0.0"
   },
-  "types": "index.d.ts",
+  "types": [
+    "./core/index.d.ts",
+    "./react/index.d.ts",
+    "./utils/types.d.ts"
+  ],
   "jest": {
     "coverageThreshold": {
       "global": {
