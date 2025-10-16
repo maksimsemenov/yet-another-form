@@ -167,7 +167,7 @@ describe('useForm', () => {
           initialProps: initialConfig,
         })
         act(() => {
-          result.current.setValue('W', 'name')
+          result.current.setValue('name', 'W')
         })
         expect(result.current.values).toEqual({ name: 'W', number: 123 })
       })
@@ -237,7 +237,7 @@ describe('useForm', () => {
         expect(result.current.isValid).toBeTruthy()
 
         act(() => {
-          result.current.setError('test error', 'name')
+          result.current.setError('name', 'test error')
         })
         expect(result.current.errors).toEqual({ name: 'test error' })
         expect(result.current.errorFields).toEqual(['name'])
@@ -313,11 +313,11 @@ describe('useForm', () => {
           initialProps: initialConfig,
         })
         act(() => {
-          result.current.setTouched({ target: { name: 'name' } }, 'name')
+          result.current.setTouched(createEvent('touch', { name: 'name' }))
         })
         expect(result.current.touched).toEqual({ name: true })
         act(() => {
-          result.current.setTouched(false, 'name')
+          result.current.setTouched('name', false)
         })
         expect(result.current.touched).toEqual({ name: false })
       })
@@ -328,7 +328,9 @@ describe('useForm', () => {
           initialProps: initialConfig,
         })
         act(() => {
-          result.current.setTouched('name')({ target: { name: 'name' } })
+          result.current.setTouched('name')(
+            createEvent('touch', { name: 'name' })
+          )
         })
         expect(result.current.touched).toEqual({ name: true })
 
@@ -360,25 +362,25 @@ describe('useForm', () => {
     expect(result.current.counterRef.current).toBe(1)
     expect(result.current.form.values).toBe(config.initialValues)
     act(() => {
-      result.current.form.setValue('W', 'name')
+      result.current.form.setValue('name', 'W')
     })
     expect(result.current.form.values).toEqual({ name: 'W', number: 123 })
     expect(result.current.counterRef.current).toBe(2)
 
     act(() => {
-      result.current.form.setValue('Wi', 'name')
+      result.current.form.setValue('name', 'Wi')
     })
     expect(result.current.form.values).toEqual({ name: 'Wi', number: 123 })
     expect(result.current.counterRef.current).toBe(3)
 
     act(() => {
-      result.current.form.setValue('Wil', 'name')
+      result.current.form.setValue('name', 'Wil')
     })
     expect(result.current.form.values).toEqual({ name: 'Wil', number: 123 })
     expect(result.current.counterRef.current).toBe(4)
 
     act(() => {
-      result.current.form.setValue('Will', 'name')
+      result.current.form.setValue('name', 'Will')
     })
     expect(result.current.form.values).toEqual({ name: 'Will', number: 123 })
     expect(result.current.counterRef.current).toBe(5)

@@ -37,8 +37,8 @@ interface UseForm<T extends object> extends FormStatus {
    */
   setValue(event: React.ChangeEvent<HTMLInputElement>): void
   setValue(
-    value: React.ChangeEvent<HTMLInputElement> | unknown,
-    fieldPath: Values<DeepPathMap<T>>
+    fieldPath: Values<DeepPathMap<T>>,
+    value: React.ChangeEvent<HTMLInputElement> | unknown
   ): void
   setValue(
     fieldPath: Values<DeepPathMap<T>>
@@ -49,8 +49,8 @@ interface UseForm<T extends object> extends FormStatus {
    * Sets error for the form or a particular field
    */
   setError(
-    error: string | undefined | unknown,
-    fieldPath: Values<DeepPathMap<T>>
+    fieldPath: Values<DeepPathMap<T>>,
+    error: string | undefined | unknown
   ): void
   setError(errors: DeepPartial<DeepMap<T, string | undefined>>): void
   setError(
@@ -62,13 +62,13 @@ interface UseForm<T extends object> extends FormStatus {
    */
   setTouched(event: React.FocusEvent<HTMLInputElement>): void
   setTouched(
-    touched: string | undefined | unknown,
-    fieldPath: Values<DeepPathMap<T>>
+    fieldPath: Values<DeepPathMap<T>>,
+    touched: boolean | undefined | unknown
   ): void
   setTouched(touched: DeepPartial<DeepMap<T, boolean>>): void
   setTouched(
     fieldPath: Values<DeepPathMap<T>>
-  ): (touched: string | undefined | unknown) => void
+  ): (touched: boolean | undefined | unknown) => void
 
   /**
    * Submits the form

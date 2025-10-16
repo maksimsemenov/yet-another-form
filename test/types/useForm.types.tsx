@@ -23,7 +23,7 @@ export const App = () => {
       <input
         name="address.city"
         onChange={setValue('address.city')}
-        onBlur={setTouched('address.city')}
+        onBlur={() => setTouched('address.city', true)}
         value={values.address?.city}
       />
     </Form>

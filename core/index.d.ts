@@ -1,4 +1,4 @@
-import { DeepMap, DeepPartial } from '../utils/types'
+import { DeepMap, VariableDeepMap, DeepPartial } from '../utils/types'
 /**
  * Object that contains current form status properties.
  */
@@ -54,8 +54,8 @@ export interface FormConfig<T extends object = {}> {
   validate?: (
     values: DeepPartial<T>
   ) =>
-    | DeepPartial<DeepMap<T, string | undefined>>
-    | Promise<DeepPartial<DeepMap<T, string | undefined>>>
+    | DeepPartial<VariableDeepMap<T, string | undefined>>
+    | Promise<DeepPartial<VariableDeepMap<T, string | undefined>>>
 }
 
 export interface FieldStatus<V = unknown> {

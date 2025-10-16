@@ -8,5 +8,10 @@
     "jsx": "react",
     "skipLibCheck": true
   },
-  "exclude": ["**/errors.ts", "**/errors.tsx"]
+  "exclude": [
+    "**/*.errors.ts",
+    "**/*.errors.tsx",
+    "**/*.types.ts",
+    "**/*.types.tsx"
+  ]
 }
