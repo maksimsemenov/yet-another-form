@@ -24,7 +24,7 @@ const setterFactory =
     if (args[0] instanceof Event) {
       store.update([[storeKey, args[0].target.name, getter(args[0])]])
     } else if (args.length === 2) {
-      store.update([[storeKey, args[1], getter(args[0])]])
+      store.update([[storeKey, args[0], getter(args[1])]])
     } else if (args.length === 1 && typeof args[0] === 'string') {
       let key = `${storeKey}-${args[0]}`
       return (

@@ -1,29 +1,4 @@
 declare module 'yet-another-form/types' {
-  // MIT License
-
-  // Copyright (c) Diego Haz
-
-  // Permission is hereby granted, free of charge, to any person obtaining a copy
-  // of this software and associated documentation files (the "Software"), to deal
-  // in the Software without restriction, including without limitation the rights
-  // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  // copies of the Software, and to permit persons to whom the Software is
-  // furnished to do so, subject to the following conditions:
-
-  // The above copyright notice and this permission notice shall be included in all
-  // copies or substantial portions of the Software.
-
-  // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  // SOFTWARE.
-
-  // Most of those awsome typings was copied from a wonderful reakit package:
-  // https://github.com/reakit/reakit
-
   /**
    * Creates an array like object with specified length
    * @template N Length
@@ -169,6 +144,24 @@ declare module 'yet-another-form/types' {
 
   /**
    * @template T Object
+   * @template V Value
+   */
+  export type VariableDeepMap<T, V> = {
+    [K in keyof T]: T[K] extends Array<infer U> | undefined
+      ? U extends object
+        ? Array<VariableDeepMap<U, V>> | V
+        : object extends U
+        ? Array<VariableDeepMap<U, V>> | V
+        : Array<V>
+      : T[K] extends object
+      ? VariableDeepMap<T[K], V> | V
+      : object extends T[K]
+      ? VariableDeepMap<T[K], V> | V
+      : V
+  }
+
+  /**
+   * @template T Object
    */
   export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends Array<infer U>
@@ -275,7 +268,7 @@ declare module 'yet-another-form/types' {
 }
 
 declare module 'yet-another-form/core' {
-  import { DeepMap, DeepPartial } from 'yet-another-form/types'
+  import { DeepMap, VariableDeepMap, DeepPartial } from 'yet-another-form/types'
   /**
    * Object that contains current form status properties.
    */
@@ -331,8 +324,8 @@ declare module 'yet-another-form/core' {
     validate?: (
       values: DeepPartial<T>
     ) =>
-      | DeepPartial<DeepMap<T, string | undefined>>
-      | Promise<DeepPartial<DeepMap<T, string | undefined>>>
+      | DeepPartial<VariableDeepMap<T, string | undefined>>
+      | Promise<DeepPartial<VariableDeepMap<T, string | undefined>>>
   }
 
   export interface FieldStatus<V = unknown> {
@@ -435,8 +428,8 @@ declare module 'yet-another-form/react' {
      */
     setValue(event: React.ChangeEvent<HTMLInputElement>): void
     setValue(
-      value: React.ChangeEvent<HTMLInputElement> | unknown,
-      fieldPath: Values<DeepPathMap<T>>
+      fieldPath: Values<DeepPathMap<T>>,
+      value: React.ChangeEvent<HTMLInputElement> | unknown
     ): void
     setValue(
       fieldPath: Values<DeepPathMap<T>>
@@ -447,8 +440,8 @@ declare module 'yet-another-form/react' {
      * Sets error for the form or a particular field
      */
     setError(
-      error: string | undefined | unknown,
-      fieldPath: Values<DeepPathMap<T>>
+      fieldPath: Values<DeepPathMap<T>>,
+      error: string | undefined | unknown
     ): void
     setError(errors: DeepPartial<DeepMap<T, string | undefined>>): void
     setError(
@@ -460,13 +453,13 @@ declare module 'yet-another-form/react' {
      */
     setTouched(event: React.FocusEvent<HTMLInputElement>): void
     setTouched(
-      touched: string | undefined | unknown,
-      fieldPath: Values<DeepPathMap<T>>
+      fieldPath: Values<DeepPathMap<T>>,
+      touched: boolean | undefined | unknown
     ): void
     setTouched(touched: DeepPartial<DeepMap<T, boolean>>): void
     setTouched(
       fieldPath: Values<DeepPathMap<T>>
-    ): (touched: string | undefined | unknown) => void
+    ): (touched: boolean | undefined | unknown) => void
 
     /**
      * Submits the form
