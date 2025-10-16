@@ -1,21 +1,6 @@
 import * as React from 'react'
 import { useForm } from 'yet-another-form/react'
 
-interface FormValues {
-  name: string
-  address: {
-    address1: string
-    city: string
-    state: string
-    zip: string
-  }
-  email: string
-  questions: {
-    question: string
-    answer: string
-  }[]
-}
-
 const initialValues = { name: '', address: { state: 'NJ', city: '' } }
 
 export const App = () => {
