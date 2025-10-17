@@ -163,12 +163,49 @@ export type VariableDeepMap<T, V> = {
  * @template T Object
  */
 export type DeepPartial<T> = {
+  // Array
   [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<DeepPartial<U>>
-    : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<DeepPartial<U>>
-    : T[P] extends string | number | boolean | Function
+    ? U extends string | number | boolean | Function
+      ? Array<U>
+      : Array<DeepPartial<U>>
+    : T[P] extends Array<infer U> | undefined
+    ? U extends string | number | boolean | Function
+      ? Array<U> | undefined
+      : Array<DeepPartial<U>> | undefined
+    : T[P] extends Array<infer U> | null
+    ? U extends string | number | boolean | Function
+      ? Array<U> | null
+      : Array<DeepPartial<U>> | null
+    : T[P] extends Array<infer U> | null | undefined
+    ? U extends string | number | boolean | Function
+      ? Array<U> | null | undefined
+      : Array<DeepPartial<U>> | null | undefined
+    : // Readonly Array
+    T[P] extends ReadonlyArray<infer U>
+    ? U extends string | number | boolean | Function
+      ? ReadonlyArray<U>
+      : ReadonlyArray<DeepPartial<U>>
+    : T[P] extends ReadonlyArray<infer U> | undefined
+    ? U extends string | number | boolean | Function
+      ? ReadonlyArray<U> | undefined
+      : ReadonlyArray<DeepPartial<U>> | undefined
+    : T[P] extends ReadonlyArray<infer U> | null
+    ? U extends string | number | boolean | Function
+      ? ReadonlyArray<U> | null
+      : ReadonlyArray<DeepPartial<U>> | null
+    : T[P] extends ReadonlyArray<infer U> | null | undefined
+    ? U extends string | number | boolean | Function
+      ? ReadonlyArray<U> | null | undefined
+      : ReadonlyArray<DeepPartial<U>> | null | undefined
+    : // String, number, boolean, function
+    T[P] extends string | number | boolean | Function
     ? T[P]
+    : T[P] extends string | number | boolean | Function | undefined
+    ? T[P] | undefined
+    : T[P] extends string | number | boolean | Function | null
+    ? T[P] | null
+    : T[P] extends string | number | boolean | Function | null | undefined
+    ? T[P] | null | undefined
     : DeepPartial<T[P]>
 }
 
