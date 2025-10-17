@@ -14,14 +14,23 @@ import { useGetters } from './useGetters'
 
 const FormContext = createContext
 
+const isEvent = (value) =>
+  !!value &&
+  typeof value === 'object' &&
+  'preventDefault' in value &&
+  typeof value.preventDefault === 'function' &&
+  'stopPropagation' in value &&
+  typeof value.stopPropagation === 'function' &&
+  'target' in value &&
+  typeof value.target === 'object'
+
 const simpleGetter = (value) => value
-const valueGetter = (value) =>
-  value instanceof Event ? value.target.value : value
+const valueGetter = (value) => (isEvent(value) ? value.target.value : value)
 
 const setterFactory =
   (store, storeKey, getter, setters) =>
   (...args) => {
-    if (args[0] instanceof Event) {
+    if (isEvent(args[0])) {
       store.update([[storeKey, args[0].target.name, getter(args[0])]])
     } else if (args.length === 2) {
       store.update([[storeKey, args[0], getter(args[1])]])
