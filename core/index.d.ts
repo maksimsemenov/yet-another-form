@@ -43,7 +43,7 @@ export interface FormConfig<T extends object = {}> {
    * element is submitted, or `formContext.submit` is called.
    */
   onSubmit?: (
-    values: DeepPartial<T>,
+    values: T,
     formSubmitBag: FormSubmitBag<T>
   ) => void | Promise<void>
 
