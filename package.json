@@ -1,6 +1,6 @@
 {
   "name": "yet-another-form",
-  "version": "1.0.12",
+  "version": "1.0.14",
   "description": "Form state management library",
   "keywords": [
     "state",
@@ -12,7 +12,10 @@
     "size": "size-limit",
     "test:watch": "npx jest --watch --env=jsdom",
     "test:watch-c": "npx jest --watch --coverage --env=jsdom",
-    "test": "npx jest --coverage --env=jsdom && check-dts"
+    "test": "npx jest --coverage --env=jsdom && check-dts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "author": "Maksim Semenov <hi@maxsemenov.com",
   "license": "MIT",
@@ -20,6 +23,7 @@
     "type": "git",
     "url": "https://github.com/maksimsemenov/yet-another-form.git"
   },
+  "homepage": "https://maksimsemenov.github.io/yet-another-form/",
   "exports": {
     "./core": "./core/index.js",
     "./react": "./react/index.js"
@@ -100,6 +104,7 @@
     "size-limit": "^11.2.0",
     "stryker-api": "0.24.1",
     "stryker-javascript-mutator": "0.14.1",
-    "stryker-jest-runner": "1.4.1"
+    "stryker-jest-runner": "1.4.1",
+    "vitepress": "^1.6.4"
   }
 }

@@ -1,0 +1,118 @@
+/**
+ * Custom theme styles for Yet Another Form documentation
+ */
+
+:root {
+  --vp-c-brand-1: #ff810a;
+  --vp-c-brand-2: #ff810a;
+  --vp-c-brand-3: #ff810a;
+
+  --vp-c-default-soft: rgba(200, 200, 200, 0.1);
+  --vp-c-bg-alt: #fbfbfb;
+}
+
+.dark {
+  --vp-c-brand-1: #ff810a;
+  --vp-c-brand-2: #ff810a;
+  --vp-c-brand-3: #ff810a;
+
+  --vp-c-bg-alt: rgba(200, 200, 200, 0.05);
+}
+
+/* Code blocks */
+.vp-doc div[class*='language-'] {
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+/* Error/Warning/Info callouts */
+.error {
+  color: #f56c6c;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.error-message {
+  color: #f56c6c;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.info {
+  color: #409eff;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.validating {
+  color: #e6a23c;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.success {
+  color: #67c23a;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Form field styling in examples */
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--vp-c-border);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: var(--vp-c-brand-1);
+}
+
+.field-status {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875rem;
+}
+
+/* Required asterisk */
+.required {
+  color: #f56c6c;
+  margin-left: 4px;
+}
+
+/* Table improvements */
+.vp-doc table {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.vp-doc th {
+  font-weight: 600;
+}
+
+/* Better spacing for lists */
+.vp-doc ul,
+.vp-doc ol {
+  padding-left: 1.5rem;
+}
+
+.vp-doc li {
+  margin: 0.5rem 0;
+}

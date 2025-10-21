@@ -2,6 +2,7 @@
 test/
 coverage/
 perf/
+docs/
 tsconfig.json
 **/*.test.ts
 **/*.test.js
