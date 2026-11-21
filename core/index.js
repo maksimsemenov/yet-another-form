@@ -3,16 +3,11 @@ import { flatten } from '../utils/flatten.js'
 import { isEqual } from '../utils/isEqual.js'
 import { set } from '../utils/set.js'
 import { get } from '../utils/get.js'
-import { memoise } from '../utils/memoise.js'
+import { normalizePath } from '../utils/path.js'
 
-const normalizePath = memoise((path) =>
-  path.includes('[') ? path.replace(/\[/g, '.').replace(/]/g, '') : path
-)
-
-const EMPTY_ARRAY = []
 export const FORM_STATUS_PATH = '__status__'
 
-export function getFieldsDiff(fields1 = {}, fields2 = {}) {
+export const getFieldsDiff = (fields1 = {}, fields2 = {}) => {
   let fieldsSet = new Set(Object.keys(fields1))
   for (let path in fields2) {
     if (fields1[path] === fields2[path]) fieldsSet.delete(path)
@@ -21,24 +16,15 @@ export function getFieldsDiff(fields1 = {}, fields2 = {}) {
   return fieldsSet
 }
 
-export const fieldsToArray = (fieldsObject) =>
-  fieldsObject
-    ? Object.keys(fieldsObject).filter((key) => fieldsObject[key])
-    : EMPTY_ARRAY
+export const fieldsToArray = (fieldsObject = {}) =>
+  Object.keys(fieldsObject).filter((key) => fieldsObject[key])
 
-export const filterMatchingFields = (paths, fields) => {
-  let listeners = new Set()
-
-  for (const path of new Set(paths)) {
-    for (const field of new Set(fields)) {
-      if (path === field || path.startsWith(field) || field.startsWith(path)) {
-        listeners.add(path)
-        break
-      }
-    }
-  }
-  return [...listeners]
-}
+export const filterMatchingFields = (paths, fields) =>
+  [...new Set(paths)].filter((path) =>
+    [...fields].some(
+      (field) => path.startsWith(field) || field.startsWith(path)
+    )
+  )
 
 export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
   let state = {},
@@ -55,6 +41,10 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
     ])
   }
 
+  // An empty field error lets the schema error show through
+  const setFieldError = (path, error) =>
+    error == null ? delete fieldErrors[path] : (fieldErrors[path] = error)
+
   const processErrors = (validationState) => {
     let flatValidations = {},
       flatErrors = {},
@@ -64,7 +54,17 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
       ...flatten(fieldErrors),
     })) {
       if (error instanceof Promise) {
-        flatValidations[path] = error.then(processAsyncError(path))
+        flatValidations[path] = error.then(
+          fieldErrors[path] === error
+            ? // Replaced by its result, so an empty one falls back to the schema
+              (result) => {
+                if (fieldErrors[path] === error) {
+                  setFieldError(path, result)
+                  validate(state.values)
+                }
+              }
+            : processAsyncError(path)
+        )
         let lastPathError = state.flatErrors?.[path]
         if (lastPathError) {
           flatErrors[path] = lastPathError
@@ -76,9 +76,13 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
       }
     }
 
+    let errorsDiff = getFieldsDiff(flatErrors, state.flatErrors)
+    // Keeps the reference so subscribers don't re-render when nothing changed
+    if (!errorsDiff.size) errors = state.errors
+
     let updatePaths = new Set([
       FORM_STATUS_PATH,
-      ...getFieldsDiff(flatErrors, state.flatErrors),
+      ...errorsDiff,
       ...getFieldsDiff(flatValidations, state.flatValidations),
     ])
     state = {
@@ -91,12 +95,21 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
     notify(filterMatchingFields(Object.keys(listeners), updatePaths))
   }
 
-  const validate = (values) => {
-    let validationState = config.validate && config.validate(values)
-    if (!validationState && !Object.keys(fieldErrors).length) return
+  // `quiet` skips the isValidating flag: re-validation after a config change
+  // would otherwise re-render on every render for an inline async validate
+  const validate = (values, quiet) => {
+    let validationState = config.validate?.(values)
+    if (
+      !validationState &&
+      !Object.keys(fieldErrors).length &&
+      getStatus().isValid
+    )
+      return
     if (validationState instanceof Promise) {
-      state.isValidating = true
-      notify([FORM_STATUS_PATH])
+      if (!quiet) {
+        state.isValidating = true
+        notify([FORM_STATUS_PATH])
+      }
       validationState.then(processErrors)
     } else processErrors(validationState)
   }
@@ -117,39 +130,36 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
     debouncedValidate = config.debounceValidation
       ? debounce(validate, config.debounceValidation)
       : validate
+    if ('values' in state) validate(state.values, true)
   }
 
   const getField = (name = '') =>
     name === FORM_STATUS_PATH
       ? getStatus()
       : {
-          error: name ? get(state.errors, name) : state.errors,
-          isDirty: name
-            ? !isEqual(get(state.values, name), get(state.initialValues, name))
-            : undefined,
+          error: get(state.errors, name),
+          isDirty: name ? isFieldDirty(name) : undefined,
           isValidating: name
-            ? state.isValidating ||
-              Boolean(state.flatValidations && state.flatValidations[name])
+            ? state.isValidating || Boolean(state.flatValidations?.[name])
             : undefined,
           touched: get(state.touched, name) || (name ? false : undefined),
-          value: name ? get(state.values, name) : state.values,
+          value: get(state.values, name),
         }
 
   const getStatus = () => {
     let validatingFields = fieldsToArray(state.flatValidations),
       errorFields = fieldsToArray(state.flatErrors),
-      dirtyFields = fieldsToArray(state.dirtyFields)
+      // Checked on read, so paths changed back or removed drop out
+      dirtyFields = Object.keys(state.dirtyFields).filter(isFieldDirty)
+
+    let isValidating = state.isValidating || Boolean(validatingFields.length)
 
     return {
       dirtyFields: dirtyFields,
       errorFields,
       isSubmitting: state.isSubmitting,
-      isValidating: state.isValidating || Boolean(validatingFields.length),
-      isValid: !(
-        state.isValidating ||
-        validatingFields.length ||
-        errorFields.length
-      ),
+      isValidating,
+      isValid: !(isValidating || errorFields.length),
       isDirty: Boolean(dirtyFields.length),
       validatingFields,
     }
@@ -164,6 +174,9 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
     }
   }
 
+  const isFieldDirty = (path) =>
+    !isEqual(get(state.values, path), get(state.initialValues, path))
+
   const update = (updates) => {
     let updatePaths = [FORM_STATUS_PATH],
       shouldValidate = false
@@ -174,24 +187,16 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
 
       if (type === 'values') {
         shouldValidate = true
-        state.dirtyFields[clearedPath] = !isEqual(
-          value,
-          get(state.initialValues, clearedPath)
+        Object.assign(
+          state.dirtyFields,
+          { [clearedPath]: 1 },
+          flatten(value, clearedPath)
         )
-        if (typeof value === 'object') {
-          const flatValue = flatten(value, clearedPath)
-          for (const key in flatValue) {
-            state.dirtyFields[key] = !isEqual(
-              value,
-              get(state.initialValues, key)
-            )
-          }
-        }
       }
 
       if (type === 'fieldErrors') {
         shouldValidate = true
-        fieldErrors[clearedPath] = value
+        setFieldError(clearedPath, value)
       } else {
         state = set(state, `${type}.${clearedPath}`, value)
       }
@@ -203,7 +208,7 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
   const subscribe = (p, cb) => {
     let np = normalizePath(p)
     ;(listeners[np] || (listeners[np] = [])).push(cb)
-    return function unsubscribe() {
+    return () => {
       listeners[np] = listeners[np].filter((l) => l !== cb)
     }
   }
@@ -211,18 +216,16 @@ export const createFormStore = ({ initialValues, ...initialConfig } = {}) => {
   const submit = (event) => {
     // eslint-disable-next-line no-unused-vars
     let { isSubmitting, ...status } = getStatus()
-    if (config.validate) {
-      if (!status.isValid) {
-        update(
-          status.errorFields
-            .concat(status.validatingFields)
-            .map((path) => ['touched', path, true])
-        )
-        return event && event.preventDefault()
-      }
+    if (config.validate && !status.isValid) {
+      update(
+        status.errorFields
+          .concat(status.validatingFields)
+          .map((path) => ['touched', path, true])
+      )
+      return event?.preventDefault()
     }
     if (config.onSubmit) {
-      event && event.type === 'submit' && event.preventDefault()
+      event?.type === 'submit' && event.preventDefault()
       update([['', 'isSubmitting', true]])
       return Promise.resolve(
         config.onSubmit(state.values, {

@@ -1398,3 +1398,224 @@ describe('createFormStore', () => {
     })
   })
 })
+
+describe('createFormStore dirty fields of nested values', () => {
+  const initialValues = { address: { city: 'A', zip: '1' }, tags: ['a'] }
+
+  it('is not dirty when an object is set to an equal value', () => {
+    const formStore = createFormStore({ initialValues })
+    formStore.update([['values', 'address', { city: 'A', zip: '1' }]])
+
+    expect(formStore.getStatus().dirtyFields).toEqual([])
+    expect(formStore.getStatus().isDirty).toBe(false)
+  })
+
+  it('marks only the changed leaves of an object dirty', () => {
+    const formStore = createFormStore({ initialValues })
+    formStore.update([['values', 'address', { city: 'B', zip: '1' }]])
+
+    expect(formStore.getStatus().dirtyFields).toEqual([
+      'address',
+      'address.city',
+    ])
+  })
+
+  it('is not dirty when an array is set to an equal value', () => {
+    const formStore = createFormStore({ initialValues })
+    formStore.update([['values', 'tags', ['a']]])
+
+    expect(formStore.getStatus().isDirty).toBe(false)
+  })
+
+  it('is not dirty when an array grows and shrinks back', () => {
+    const formStore = createFormStore({ initialValues })
+    formStore.update([['values', 'tags', ['a', 'b']]])
+    expect(formStore.getStatus().dirtyFields).toEqual(['tags', 'tags.1'])
+
+    formStore.update([['values', 'tags', ['a']]])
+    expect(formStore.getStatus().isDirty).toBe(false)
+  })
+
+  it('tracks bracket paths into arrays of objects', () => {
+    const formStore = createFormStore({
+      initialValues: { items: [{ title: 'a' }] },
+    })
+    formStore.update([['values', 'items[0].title', 'b']])
+    expect(formStore.getStatus().dirtyFields).toEqual(['items.0.title'])
+    expect(formStore.getField('items').isDirty).toBe(true)
+
+    formStore.update([['values', 'items[0].title', 'a']])
+    expect(formStore.getStatus().isDirty).toBe(false)
+    expect(formStore.getField('items').isDirty).toBe(false)
+  })
+
+  it('is not dirty when the whole form is set to equal values', () => {
+    const formStore = createFormStore({ initialValues })
+    formStore.update([
+      ['values', '', { address: { city: 'A', zip: '1' }, tags: ['a'] }],
+    ])
+
+    expect(formStore.getStatus().isDirty).toBe(false)
+  })
+
+  it('is not dirty when a leaf is changed back after its parent was set', () => {
+    const formStore = createFormStore({ initialValues })
+    formStore.update([['values', 'address', { city: 'B', zip: '1' }]])
+    formStore.update([['values', 'address.city', 'A']])
+
+    expect(formStore.getStatus().isDirty).toBe(false)
+  })
+})
+
+describe('createFormStore error fallback', () => {
+  const tick = (ms = 0) => new Promise((res) => setTimeout(res, ms))
+  const validate = (values) => ({
+    name: values.name === 'admin' ? 'reserved' : undefined,
+    address: { city: values.address?.city ? undefined : 'required' },
+  })
+  const initialValues = { name: 'admin', address: { city: 'Paris' } }
+
+  it('shows the field error over the schema error', () => {
+    const formStore = createFormStore({ initialValues, validate })
+    formStore.update([['fieldErrors', 'name', 'taken']])
+
+    expect(formStore.getField('name').error).toBe('taken')
+    expect(formStore.getStatus().errorFields).toEqual(['name'])
+  })
+
+  it.each([undefined, null])(
+    'falls back to the schema error when the field error is set to %s',
+    (empty) => {
+      const formStore = createFormStore({ initialValues, validate })
+      formStore.update([['fieldErrors', 'name', 'taken']])
+      formStore.update([['fieldErrors', 'name', empty]])
+
+      expect(formStore.getField('name').error).toBe('reserved')
+    }
+  )
+
+  it('has no error once neither the field nor the schema has one', () => {
+    const formStore = createFormStore({
+      initialValues: { name: 'Mike' },
+      validate: (values) => (values.name ? undefined : { name: 'required' }),
+    })
+    formStore.update([['fieldErrors', 'name', 'taken']])
+    formStore.update([['fieldErrors', 'name', undefined]])
+
+    expect(formStore.getField('name').error).toBeUndefined()
+    expect(formStore.getStatus().isValid).toBe(true)
+  })
+
+  it('falls back for nested paths', () => {
+    const formStore = createFormStore({
+      initialValues: { address: { city: '' } },
+      validate,
+    })
+    formStore.update([['fieldErrors', 'address[city]', 'unknown city']])
+    expect(formStore.getField('address.city').error).toBe('unknown city')
+
+    formStore.update([['fieldErrors', 'address.city', undefined]])
+    expect(formStore.getField('address.city').error).toBe('required')
+  })
+
+  it('keeps showing the current error while a server error is pending', () => {
+    const formStore = createFormStore({ initialValues, validate })
+    formStore.update([['fieldErrors', 'name', new Promise(() => {})]])
+
+    expect(formStore.getField('name').error).toBe('reserved')
+    expect(formStore.getField('name').isValidating).toBe(true)
+    expect(formStore.getStatus().validatingFields).toEqual(['name'])
+  })
+
+  it('shows a server error that resolves to a message', async () => {
+    const formStore = createFormStore({ initialValues, validate })
+    formStore.update([['fieldErrors', 'name', Promise.resolve('taken')]])
+    await tick()
+
+    expect(formStore.getField('name').error).toBe('taken')
+    expect(formStore.getStatus().isValidating).toBe(false)
+  })
+
+  it('falls back to the schema error when a server error resolves empty', async () => {
+    const formStore = createFormStore({ initialValues, validate })
+    formStore.update([['fieldErrors', 'name', 'taken']])
+    formStore.update([['fieldErrors', 'name', Promise.resolve(undefined)]])
+    await tick()
+
+    expect(formStore.getField('name').error).toBe('reserved')
+    expect(formStore.getStatus().validatingFields).toEqual([])
+  })
+
+  it('clears a server error that resolves empty when there is no schema', async () => {
+    const formStore = createFormStore()
+    formStore.update([['fieldErrors', 'name', Promise.resolve(undefined)]])
+    await tick()
+
+    expect(formStore.getField('name').error).toBeUndefined()
+    expect(formStore.getStatus()).toMatchObject({
+      isValid: true,
+      isValidating: false,
+      validatingFields: [],
+    })
+  })
+
+  it('ignores a server error that was replaced before it resolved', async () => {
+    const formStore = createFormStore({ initialValues, validate })
+    formStore.update([['fieldErrors', 'name', tick(10).then(() => 'stale')]])
+    formStore.update([['fieldErrors', 'name', 'taken']])
+    await tick(20)
+
+    expect(formStore.getField('name').error).toBe('taken')
+  })
+
+  it('does not re-check a resolved server error on later changes', async () => {
+    const formStore = createFormStore({ initialValues, validate })
+    formStore.update([['fieldErrors', 'name', Promise.resolve('taken')]])
+    await tick()
+    formStore.update([['values', 'name', 'Mike']])
+
+    expect(formStore.getField('name').error).toBe('taken')
+    expect(formStore.getStatus().validatingFields).toEqual([])
+  })
+})
+
+describe('createFormStore setConfig', () => {
+  it('re-runs validation when validate changes', () => {
+    const formStore = createFormStore({ initialValues: { name: '' } })
+    expect(formStore.getStatus().isValid).toBe(true)
+
+    formStore.setConfig({ validate: (v) => ({ name: required(v.name) }) })
+    expect(formStore.getStatus().errorFields).toEqual(['name'])
+
+    formStore.setConfig({})
+    expect(formStore.getStatus().errorFields).toEqual([])
+  })
+
+  it('applies an async validate without flagging the form as validating', async () => {
+    const formStore = createFormStore({ initialValues: { name: '' } })
+    formStore.setConfig({ validate: async (v) => ({ name: required(v.name) }) })
+    expect(formStore.getStatus().isValidating).toBe(false)
+
+    await new Promise((res) => setTimeout(res, 0))
+    expect(formStore.getStatus().errorFields).toEqual(['name'])
+  })
+
+  it('keeps the errors object when re-validation gives the same errors', () => {
+    const formStore = createFormStore({
+      initialValues: { name: '' },
+      validate: (v) => ({ name: required(v.name) }),
+    })
+    const errors = formStore.getField('').error
+
+    formStore.setConfig({ validate: (v) => ({ name: required(v.name) }) })
+    expect(formStore.getField('').error).toBe(errors)
+  })
+
+  it('validates only once when the store is created', () => {
+    const validate = jest.fn(() => undefined)
+    createFormStore({ initialValues: { name: 'Mike' }, validate })
+
+    expect(validate).toHaveBeenCalledTimes(1)
+    expect(validate).toHaveBeenCalledWith({ name: 'Mike' })
+  })
+})

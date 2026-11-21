@@ -4,12 +4,10 @@ import { nestedPathRegExp } from './path.js'
 export const get = (source, path) => {
   if (source == null || !path) return path ? undefined : source
   if (!nestedPathRegExp.test(path)) return source[path]
-  let pathArray = pathToArray(path),
-    current = source
-
-  for (let i = 0; i < pathArray.length; i++) {
-    current = current[pathArray[i]]
-    if (!current && i !== pathArray.length - 1) return undefined
+  let current = source
+  for (let key of pathToArray(path)) {
+    if (!current) return
+    current = current[key]
   }
   return current
 }

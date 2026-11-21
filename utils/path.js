@@ -1,4 +1,4 @@
-import { memoise } from './memoise'
+import { memoise } from './memoise.js'
 
 export const nestedPathRegExp = /[[.]+/
 
@@ -6,7 +6,6 @@ export const nestedPathRegExp = /[[.]+/
  * @param {string} path
  * @returns string
  */
-const _normalizePath = (path) =>
-  path.includes('[') ? path.replace(/\[/g, '.').replace(/]/g, '') : path
+const _normalizePath = (path) => path.replace(/\[/g, '.').replace(/]/g, '')
 
 export const normalizePath = memoise(_normalizePath)
