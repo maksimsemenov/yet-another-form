@@ -23,6 +23,18 @@ describe('get', () => {
     })
   })
 
+  it('returns undefined when a nested segment is falsy', () => {
+    expect(get({ a: 0 }, 'a.b')).toBeUndefined()
+    expect(get({ a: '' }, 'a.length')).toBeUndefined()
+    expect(get({ a: null }, 'a[0]')).toBeUndefined()
+  })
+
+  it('returns a falsy value at the end of a nested path', () => {
+    expect(get({ a: { b: 0 } }, 'a.b')).toBe(0)
+    expect(get({ a: [''] }, 'a[0]')).toBe('')
+    expect(get({ a: { b: false } }, 'a.b')).toBe(false)
+  })
+
   it('should get simple object keys', () => {
     expect(get({ foo: 'bar' }, 'foo')).toBe('bar')
     expect(get({ life: 42 }, 'life')).toBe(42)

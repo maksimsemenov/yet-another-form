@@ -206,3 +206,79 @@ describe('useFormField', () => {
     })
   })
 })
+
+describe('useFormField error fallback', () => {
+  const validate = (values) => ({
+    name: values.name === 'admin' ? 'reserved' : undefined,
+  })
+
+  test('setError(undefined) falls back to the form schema error', () => {
+    const formContext = createFormStore({
+      initialValues: { name: 'admin' },
+      validate,
+    })
+    const { result } = renderHook(() => useFormField('name', { formContext }))
+
+    act(() => {
+      result.current.setError('taken')
+    })
+    expect(result.current.error).toBe('taken')
+
+    act(() => {
+      result.current.setError(undefined)
+    })
+    expect(result.current.error).toBe('reserved')
+  })
+
+  test('a field validate error shows over the schema error and falls back to it', () => {
+    const formContext = createFormStore({
+      initialValues: { name: '' },
+      validate,
+    })
+    const { result } = renderHook(() =>
+      useFormField('name', {
+        formContext,
+        validate: (value) => (value.length < 3 ? 'too short' : undefined),
+      })
+    )
+
+    act(() => {
+      result.current.setValue('ad')
+    })
+    expect(result.current.error).toBe('too short')
+
+    act(() => {
+      result.current.setValue('admin')
+    })
+    expect(result.current.error).toBe('reserved')
+
+    act(() => {
+      result.current.setValue('Mike')
+    })
+    expect(result.current.error).toBeUndefined()
+  })
+
+  test('an async field validate falls back to the schema error once it passes', async () => {
+    const formContext = createFormStore({
+      initialValues: { name: '' },
+      validate,
+    })
+    const { result, waitFor } = renderHook(() =>
+      useFormField('name', {
+        formContext,
+        validate: async (value) => (value.length < 3 ? 'too short' : undefined),
+      })
+    )
+
+    act(() => {
+      result.current.setValue('ad')
+    })
+    await waitFor(() => expect(result.current.error).toBe('too short'))
+
+    act(() => {
+      result.current.setValue('admin')
+    })
+    await waitFor(() => expect(result.current.error).toBe('reserved'))
+    expect(result.current.isValidating).toBe(false)
+  })
+})

@@ -111,6 +111,10 @@ const { Form } = useForm({
 })
 ```
 
+::: info
+If `validate` changes, the current values are validated again. An inline function is a new one on every render, so wrap it in `useCallback` if validation is expensive.
+:::
+
 ## Return Value
 
 ### `Form`
@@ -284,10 +288,10 @@ const { setError } = useForm()
 // Set error
 setError('email', 'Invalid email')
 
-// Clear error
+// Clear error (an error from `validate` shows again, if there is one)
 setError('email', undefined)
 
-// Async error
+// Async error (resolving to undefined also falls back to the `validate` error)
 setError('email', validateEmailOnServer(email))
 ```
 
@@ -311,8 +315,8 @@ setTouched(fieldPath: string) => (event: BlurEvent) => void
 ```jsx
 const { setTouched } = useForm()
 
-// As event handler
-<input onBlur={setTouched} />
+// As event handler (uses the input's name; events from unnamed controls are ignored)
+<input name="email" onBlur={setTouched} />
 
 // Programmatic
 setTouched('email', true)

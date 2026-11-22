@@ -8,20 +8,15 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { createFormStore, FORM_STATUS_PATH } from '../core'
-import { isEqual } from '../utils/isEqual'
-import { useGetters } from './useGetters'
+import { createFormStore, FORM_STATUS_PATH } from '../core/index.js'
+import { isEqual } from '../utils/isEqual.js'
+import { useGetters } from './useGetters.js'
 
-const FormContext = createContext
+const FormContext = createContext()
 
 const isEvent = (value) =>
-  !!value &&
-  typeof value === 'object' &&
-  'preventDefault' in value &&
-  typeof value.preventDefault === 'function' &&
-  'stopPropagation' in value &&
+  typeof value?.preventDefault === 'function' &&
   typeof value.stopPropagation === 'function' &&
-  'target' in value &&
   typeof value.target === 'object'
 
 const simpleGetter = (value) => value
@@ -30,19 +25,24 @@ const valueGetter = (value) => (isEvent(value) ? value.target.value : value)
 const setterFactory =
   (store, storeKey, getter, setters) =>
   (...args) => {
-    if (isEvent(args[0])) {
-      store.update([[storeKey, args[0].target.name, getter(args[0])]])
+    let [path, value] = args
+    if (isEvent(path)) {
+      // An unnamed control (e.g. a button) would write to the root path
+      if (path.target.name) {
+        store.update([[storeKey, path.target.name, getter(path)]])
+      }
     } else if (args.length === 2) {
-      store.update([[storeKey, args[0], getter(args[1])]])
-    } else if (args.length === 1 && typeof args[0] === 'string') {
-      let key = `${storeKey}-${args[0]}`
-      return (
-        setters[key] ||
-        (setters[key] = (value) =>
-          store.update([[storeKey, args[0], getter(value)]]))
-      )
-    } else if (args.length === 1 && typeof args[0] === 'object') {
-      store.update([[storeKey, '', args[0]]])
+      store.update([[storeKey, path, getter(value)]])
+    } else if (args.length === 1) {
+      if (typeof path === 'string') {
+        let key = `${storeKey}-${path}`
+        return (
+          setters[key] ||
+          (setters[key] = (value) =>
+            store.update([[storeKey, path, getter(value)]]))
+        )
+      }
+      if (typeof path === 'object') store.update([[storeKey, '', path]])
     }
   }
 
