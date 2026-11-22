@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import { createElement, useRef, useEffect } from 'react'
 import { act, renderHook } from '@testing-library/react-hooks'
 import { create } from 'react-test-renderer'
@@ -539,6 +540,19 @@ describe('useForm fixes', () => {
     })
     expect(result.current.errorFields).toEqual(['name'])
     expect(result.current.isValid).toBe(false)
+  })
+
+  test('an inline onSubmit does not re-run validation on re-render', () => {
+    const validate = jest.fn(() => ({}))
+    let { result, rerender } = renderHook(() =>
+      useForm({ initialValues: { name: '' }, validate, onSubmit: () => {} })
+    )
+    expect(validate).toHaveBeenCalledTimes(1)
+
+    rerender()
+    rerender()
+    expect(validate).toHaveBeenCalledTimes(1)
+    expect(result.current.isValid).toBe(true)
   })
 
   test('an inline sync validate does not cause a render loop', () => {

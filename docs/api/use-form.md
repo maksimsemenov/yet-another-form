@@ -112,7 +112,7 @@ const { Form } = useForm({
 ```
 
 ::: info
-If the config changes (e.g. a new `validate`), the current values are validated again. An inline function is a new one on every render, so wrap it in `useCallback` if validation is expensive.
+If `validate` changes, the current values are validated again. An inline function is a new one on every render, so wrap it in `useCallback` if validation is expensive.
 :::
 
 ## Return Value

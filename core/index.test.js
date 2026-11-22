@@ -1458,6 +1458,17 @@ describe('createFormStore dirty fields of nested values', () => {
     expect(formStore.getStatus().isDirty).toBe(false)
   })
 
+  it('keeps sibling paths that share a prefix apart', () => {
+    const formStore = createFormStore({
+      initialValues: { items: Array.from({ length: 11 }, (_, i) => `${i}`) },
+    })
+    formStore.update([['values', 'items[10]', 'x']])
+    formStore.update([['values', 'items[1]', 'y']])
+    formStore.update([['values', 'items[1]', '1']])
+
+    expect(formStore.getStatus().dirtyFields).toEqual(['items.10'])
+  })
+
   it('is not dirty when a leaf is changed back after its parent was set', () => {
     const formStore = createFormStore({ initialValues })
     formStore.update([['values', 'address', { city: 'B', zip: '1' }]])
@@ -1609,6 +1620,15 @@ describe('createFormStore setConfig', () => {
 
     formStore.setConfig({ validate: (v) => ({ name: required(v.name) }) })
     expect(formStore.getField('').error).toBe(errors)
+  })
+
+  it('does not re-validate when the rest of the config changes', () => {
+    const validate = jest.fn(() => undefined)
+    const formStore = createFormStore({ initialValues: { name: '' }, validate })
+    formStore.setConfig({ validate, onSubmit: () => {} })
+    formStore.setConfig({ validate, debounceValidation: 10 })
+
+    expect(validate).toHaveBeenCalledTimes(1)
   })
 
   it('validates only once when the store is created', () => {
